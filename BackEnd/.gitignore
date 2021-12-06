@@ -1,0 +1,36 @@
+
+# BackEnd
+
+## Builds and Auto-Generations
+
+[Bb]in/
+[Oo]bj/
+[Ll]ib/
+[Pp]ackages/
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+[Mm]igrations/
+AIBot/GccWorkDir/
+AIBot/CppCheckWorkDir/
+
+*.exe
+*.lib
+*.dll
+*.obj
+
+## Tests and Logs
+[Tt]est[Rr]esult*/
+[Ll]og/
+[Bb]uild[Ll]og.*
+
+
+
+## IDE and Tools
+.[Vv]s/
+.[Vv]scode/
+
+
+## user profiles
+*.csproj.user

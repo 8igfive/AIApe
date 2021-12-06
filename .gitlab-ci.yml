@@ -1,0 +1,27 @@
+#image: python:latest
+image: mcr.microsoft.com/dotnet/sdk:5.0
+
+variables:
+  NUGET_PATH: 'C:\NuGet\nuget.exe'
+  MSBUILD_PATH: 'C:\Program Files (x86)\MSBuild\14.0\Bin\msbuild.exe'
+
+stages:
+  - backend_unittest
+
+test_job:
+  stage: backend_unittest
+  script:
+    - export PATH="$PATH:/root/.dotnet/tools"
+    - apt-get update
+    - apt-get install python3 -y
+    - apt-get install zip -y
+    - python3 --version
+    - dotnet --version
+    - python3 ./Scripts/BackEndUnitTest.py
+  artifacts:
+    name: test_report
+    paths:
+      - report.zip
+    expire_in: 1 week
+    
+    

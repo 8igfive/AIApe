@@ -1,0 +1,13 @@
+@font-face {
+        font-family: 'msyh';
+        src: url('msyh.ttf');
+        font-weight: normal;
+        font-style: normal;
+    }
+
+@font-face {
+    font-family: 'pinghei';
+    src: url("../../assets/font/PingHei-text.woff.ttf");
+    font-weight: normal;
+    font-style: normal;
+}

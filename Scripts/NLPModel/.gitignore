@@ -1,0 +1,6 @@
+__pycache__/
+.idea/
+corpus/
+pre_trained_model/
+fine_tuned_model/
+embeddings/
