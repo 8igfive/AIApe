@@ -12,14 +12,15 @@ class NotFound(Exception):
     pass
 
 default_jwt = ""
-protocol = "https"
+protocol = "http"
 base_urls = [
         "test.snowphoenix.design", 
         "localhost:5000", 
-        "aiape.snowphoenix.design"]
+        "aiape.snowphoenix.design",
+        "39.105.155.243"]
 
 # 修改这里来选择一个合适的远端
-base_url = base_urls[2]
+base_url = base_urls[3]
 log(f"using base_url: {base_url}")
 
 def set_default_jwt(token: str):
