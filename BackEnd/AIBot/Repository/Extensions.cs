@@ -22,6 +22,8 @@ namespace Buaa.AIBot.Repository
                 })
                 .AddScoped<IUserRepository, UserRepository>()
                 .AddScoped<IQuestionRepository, QuestionRepository>()
+                .AddScoped<IFavoriteRepository, FavoriteRepository>()
+                .AddScoped<ICollectRepository, CollectRepository>()
                 .AddScoped<IAnswerRepository, AnswerRepository>()
                 .AddScoped<ITagRepostory, TagRepository>()
                 .AddScoped<ILikeRepository, LikeRepository>()

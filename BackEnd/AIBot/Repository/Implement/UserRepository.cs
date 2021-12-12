@@ -321,5 +321,51 @@ namespace Buaa.AIBot.Repository.Implement
                 await SaveChangesAgainAndAgainAsync();
             }
         }
+
+        private async Task<bool> CheckUserExistAsync(int uid)
+        {
+            var user = await Context.Users
+                .Where(u => u.UserId == uid)
+                .SingleOrDefaultAsync(CancellationToken);
+            CancellationToken.ThrowIfCancellationRequested();
+            return user != null;
+        }
+
+        public async Task<IEnumerable<int>> SelectFavoritesIdByIdAsync(int userId)
+        {
+            var res = await Context.Favorites
+                .Where(f => f.UserId == userId)
+                .Select(f => f.FavoriteId)
+                .ToListAsync(CancellationToken);
+            CancellationToken.ThrowIfCancellationRequested();
+            if (res.Count != 0)
+            {
+                return res;
+            }
+            if (!(await CheckUserExistAsync(userId)))
+            {
+                return null;
+            }
+            return res;
+        }
+
+        public async Task<IEnumerable<int>> SelectFavoritesIdByIdByCreateTimeAsync(int userId)
+        {
+            var res = await Context.Favorites
+                .Where(f => f.UserId == userId)
+                .OrderBy(f => f.CreateTime)
+                .Select(f => f.FavoriteId)
+                .ToListAsync(CancellationToken);
+            CancellationToken.ThrowIfCancellationRequested();
+            if (res.Count != 0)
+            {
+                return res;
+            }
+            if (!(await CheckUserExistAsync(userId)))
+            {
+                return null;
+            }
+            return res;
+        }
     }
 }

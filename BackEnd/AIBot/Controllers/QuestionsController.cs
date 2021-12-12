@@ -84,8 +84,8 @@ namespace Buaa.AIBot.Controllers
                 case LikeProduceResult.ResultStatus.notLiked:
                     message = $"fail to unmark question as like because user has not liked the question yet.";
                     break;
-                case LikeProduceResult.ResultStatus.answerNotExist:
-                    message = $"fail to {mark} question as like because the answer not exists.";
+                case LikeProduceResult.ResultStatus.questionNotExist:
+                    message = $"fail to {mark} question as like because the question not exists.";
                     break;
                 default:
                     message = $"unknown error: {ret.Status}.";
@@ -120,7 +120,7 @@ namespace Buaa.AIBot.Controllers
                 {
                     Status = "questionNotExist",
                     Message = $"question with qid={qid} dose not exist",
-                    QuestionAsync= new QuestionInformation()
+                    Question = new QuestionInformation()
                 });
             }
         }
@@ -382,10 +382,10 @@ namespace Buaa.AIBot.Controllers
                 });
             }
 
-            string question = (body.Question == null)? "" : body.Question;
-            string remarks = (body.Remarks == null)? "" : body.Remarks;
+            string question = body.Question;
+            string remarks = body.Remarks;
             int? bestAnswer = body.BestAnswer;
-            IEnumerable<int> tags = (body.Tags == null)? new int[0] : body.Tags;
+            IEnumerable<int> tags = body.Tags;
 
             try
             {
@@ -450,7 +450,7 @@ namespace Buaa.AIBot.Controllers
                 });
             }
             
-            string content = (body.Content == null)? "" : body.Content;
+            string content = body.Content;
             try
             {
                 await questionService.ModifyAnswerAsync(aid, content);
@@ -473,9 +473,9 @@ namespace Buaa.AIBot.Controllers
         public async Task<IActionResult> ModifyTagAsync(QuestionBody body)
         {
             int tid = body.Tid.GetValueOrDefault(-1);
-            string name = (body.Name == null)? "" : body.Name;
-            string desc = (body.Desc == null)? "" : body.Desc;
-            string category = (body.Category == null) ? "" : body.Category;
+            string name = body.Name;
+            string desc = body.Desc;
+            string category = body.Category;
             try
             {
                 await questionService.ModifyTagAsync(tid, name, desc, category);

@@ -79,12 +79,12 @@ namespace Buaa.AIBot.Repository
         /// Mark the question as liked for user.
         /// </summary>
         /// <remarks>
-        /// After call, <see cref="UserLikedQuestion(int, int)"/> returns true when using same params, 
-        /// and the result of <see cref="SelectLikesCountForQuestion(int)"/> increased.
+        /// After call, <see cref="UserLikedQuestionAsync(int, int)"/> returns true when using same params, 
+        /// and the result of <see cref="SelectLikesCountForQuestionAsync(int)"/> increased.
         /// </remarks>
         /// <exception cref="UserNotExistException">given uid matches no User.</exception>
         /// <exception cref="QuestionNotExistException">given qid matches no Question.</exception>
-        /// <exception cref="UserHasLikedTargetException"><see cref="UserLikedQuestion(int, int)"/> return true before call.</exception>
+        /// <exception cref="UserHasLikedTargetException"><see cref="UserLikedQuestionAsync(int, int)"/> return true before call.</exception>
         /// <param name="uid"></param>
         /// <param name="qid"></param>
         /// <returns></returns>
@@ -94,12 +94,12 @@ namespace Buaa.AIBot.Repository
         /// Unmark the question as liked for user.
         /// </summary>
         /// <remarks>
-        /// After call, <see cref="UserLikedQuestion(int, int)"/> returns false when using same params, 
-        /// and the result of <see cref="SelectLikesCountForQuestion(int)"/> decreased.
+        /// After call, <see cref="UserLikedQuestionAsync(int, int)"/> returns false when using same params, 
+        /// and the result of <see cref="SelectLikesCountForQuestionAsync(int)"/> decreased.
         /// </remarks>
         /// <exception cref="UserNotExistException">given uid matches no User.</exception>
         /// <exception cref="QuestionNotExistException">given qid matches no Question.</exception>
-        /// <exception cref="UserNotLikedTargetException"><see cref="UserLikedQuestion(int, int)"/> return false before call.</exception>
+        /// <exception cref="UserNotLikedTargetException"><see cref="UserLikedQuestionAsync(int, int)"/> return false before call.</exception>
         /// <param name="uid"></param>
         /// <param name="qid"></param>
         /// <returns></returns>

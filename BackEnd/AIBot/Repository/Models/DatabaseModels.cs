@@ -35,6 +35,7 @@ namespace Buaa.AIBot.Repository.Models
         public List<AnswerData> Answers { get; set; }
         public List<LikeAnswer> LikeAnswers { get; set; }
         public List<LikeQuestion> LikeQuestions { get; set; }
+        public List<FavoriteData> Favorites { get; set; }
     }
 
     public class QuestionData
@@ -64,6 +65,7 @@ namespace Buaa.AIBot.Repository.Models
         public List<QuestionTagRelation> QuestionTagRelation { get; set; }
         public List<LikeQuestion> LikedInfo { get; set; }
         public QuestionHotData HotData { get; set; }
+        public List<FavoriteQuestionRelation> CollectedInfo { get; set; }
     }
 
     public class QuestionHotData
@@ -100,6 +102,7 @@ namespace Buaa.AIBot.Repository.Models
         public UserData User { get; set; }
         public QuestionData Question { get; set; }
         public List<LikeAnswer> LikedInfo { get; set; }
+        public List<FavoriteAnswerRelation> CollectedInfo { get; set; }
     }
 
     public class TagData
@@ -189,6 +192,73 @@ namespace Buaa.AIBot.Repository.Models
         public override int GetHashCode()
         {
             return HashCode.Combine(UserId, QuestionId);
+        }
+    }
+
+    public class FavoriteData
+    {
+        [Key]
+        public int FavoriteId { get; set; }
+        public int UserId { get; set; }
+
+        [Required]
+        [Column(TypeName = "varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci")]
+        public string Name { get; set; }
+
+        [Required]
+        [Column(TypeName = "longtext")]
+        public string Description { get; set; }
+
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public DateTime CreateTime { get; set; }
+
+        // relation references
+        public UserData User { get; set; }
+        public List<FavoriteQuestionRelation> FavoriteQuestions { get; set; }
+        public List<FavoriteAnswerRelation> FavoriteAnswers { get; set; }
+    }
+
+    public class FavoriteQuestionRelation
+    {
+        public int FavoriteId { get; set; }
+        public int QuestionId { get; set; }
+
+        // relation references
+        public FavoriteData Favorite { get; set; }
+        public QuestionData Question { get; set; }
+
+        public override bool Equals(object obj) 
+        {
+            return obj is FavoriteQuestionRelation relation &&
+                   FavoriteId == relation.FavoriteId &&
+                   QuestionId == relation.QuestionId;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(FavoriteId, QuestionId);
+        }
+    }
+
+    public class FavoriteAnswerRelation
+    {
+        public int FavoriteId { get; set; }
+        public int AnswerId { get; set; }
+
+        // relation references
+        public FavoriteData Favorite { get; set; }
+        public AnswerData Answer { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            return obj is FavoriteAnswerRelation relation &&
+                   FavoriteId == relation.FavoriteId &&
+                   AnswerId == relation.AnswerId;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(FavoriteId, AnswerId);
         }
     }
 

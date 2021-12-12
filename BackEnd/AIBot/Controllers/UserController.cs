@@ -448,6 +448,32 @@ namespace Buaa.AIBot.Controllers
             }
         }
 
+        [Authorize(Policy = "UserAdmin")]
+        [HttpGet("favorites")]
+        public async Task<IActionResult> FavoritesAsync()
+        {
+            int uid;
+            uid = userService.GetUidFromParameters(Request);
+            uid = (uid == -1)? userService.GetUidFromToken(Request) : uid;
+            IEnumerable<int> fids = await userRepository.SelectFavoritesIdByIdByCreateTimeAsync(uid);
+            if (fids == null)
+            {
+                return NotFound(new
+                {
+                    Status = "userNotExist",
+                    Message = "user dose not exist",
+                    Favorites = new object[0]
+                });
+            } else {
+                return Ok(new
+                {
+                    Status = "success",
+                    Message = $"get favorites for user{uid} successfully",
+                    Favorites = fids
+                });
+            }
+        }
+
         /// <summary>
         /// Fresh token, leave alone if the user has changed his password.
         /// </summary>

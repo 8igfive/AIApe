@@ -22,8 +22,10 @@ namespace AIBotTest.Services
         private Mock<ILikeRepository> likeMock = new Mock<ILikeRepository>();
         private Mock<INLPService> nlpMock = new Mock<INLPService>();
 
+        private Mock<ICollectRepository> colMock = new Mock<ICollectRepository>();
+
         private IQuestionService CreateQuestionService()
-            => new QuestionService(queMock.Object, ansMock.Object, tagMock.Object, likeMock.Object, nlpMock.Object);
+            => new QuestionService(queMock.Object, ansMock.Object, tagMock.Object, likeMock.Object, nlpMock.Object, colMock.Object);
 
         #region GetQuestionAsync
 

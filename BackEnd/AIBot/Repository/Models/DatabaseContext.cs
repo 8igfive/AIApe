@@ -38,6 +38,9 @@ namespace Buaa.AIBot.Repository.Models
         public DbSet<LikeAnswer> LikeAnswers { get; set; }
         public DbSet<QuestionTagRelation> QuestionTagRelations { get; set; }
         public DbSet<QuestionHotData> QuestionHotDatas { get; set; }
+        public DbSet<FavoriteData> Favorites { get; set; }
+        public DbSet<FavoriteQuestionRelation> FavoriteQuestionRelations { get; set; }
+        public DbSet<FavoriteAnswerRelation> FavoriteAnswerRelations { get; set; }
         public DbSet<NatrualAnswer> NatrualAnswers { get; set; }
         public DbSet<NaturalQuestion> NatrualQuestions { get; set; }
         public DbSet<NatrualQuestionAnswerRelation> NatrualQuestionAnswerRelations { get; set; }
@@ -136,6 +139,43 @@ namespace Buaa.AIBot.Repository.Models
 
             modelBuilder.Entity<UserData>()
                 .HasAlternateKey(u => u.Email);
+
+            // User--<1>--Create--<n>--Favorite
+            modelBuilder.Entity<FavoriteData>()
+                .HasOne(f => f.User)
+                .WithMany(u => u.Favorites)
+                .OnDelete(DeleteBehavior.Cascade)
+                ;
+
+            #region Favorite--<n>--FavoriteQuestionRelation--<n>--Question
+
+            modelBuilder.Entity<FavoriteQuestionRelation>()
+                .HasKey(fqr => new { fqr.FavoriteId, fqr.QuestionId });
+
+            modelBuilder.Entity<FavoriteQuestionRelation>()
+                .HasOne(fqr => fqr.Favorite)
+                .WithMany(f => f.FavoriteQuestions);
+
+            modelBuilder.Entity<FavoriteQuestionRelation>()
+                .HasOne(fqr => fqr.Question)
+                .WithMany(q => q.CollectedInfo);
+
+            #endregion
+
+            #region Favorite--<n>--FavoriteAnswerRelation--<n>--Answer
+
+            modelBuilder.Entity<FavoriteAnswerRelation>()
+                .HasKey(far => new { far.FavoriteId, far.AnswerId });
+
+            modelBuilder.Entity<FavoriteAnswerRelation>()
+                .HasOne(far => far.Favorite)
+                .WithMany(f => f.FavoriteAnswers);
+
+            modelBuilder.Entity<FavoriteAnswerRelation>()
+                .HasOne(far => far.Answer)
+                .WithMany(a => a.CollectedInfo);
+
+            #endregion
         }
     }
 }

@@ -66,6 +66,20 @@ namespace Buaa.AIBot.Repository
         Task<IEnumerable<AnswerIdInfo>> SelectAnswersIdByIdByModifyTimeAsync(int userId);
 
         /// <summary>
+        /// Select all fid by uid;
+        /// </summary>
+        /// <param name="userId">uid</param>
+        /// <returns>list of fid, may empty. null if not exist</returns>
+        Task<IEnumerable<int>> SelectFavoritesIdByIdAsync(int userId);
+
+        /// <summary>
+        /// Select all fid by uid, sorted by creatTime, the first is the oldest.
+        /// </summary>
+        /// <param name="userId">uid</param>
+        /// <returns>list of fid, may empty. null if not exist</returns>
+        Task<IEnumerable<int>> SelectFavoritesIdByIdByCreateTimeAsync(int userId);
+
+        /// <summary>
         /// Insert a new user. UserId will be generated automatically.
         /// </summary>
         /// <remarks>

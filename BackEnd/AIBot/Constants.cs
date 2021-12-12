@@ -15,5 +15,7 @@ namespace Buaa.AIBot
         public static readonly int QuestionTitleMaxLength = 150;
 
         public static readonly int TagNameMaxLength = 16;
+
+        public static readonly int FavoriteNameMaxLength = 30;
     }
 }

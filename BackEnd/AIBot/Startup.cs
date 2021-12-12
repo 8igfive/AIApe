@@ -76,6 +76,8 @@ namespace Buaa.AIBot
 
                 .AddTransient<IQuestionService, QuestionService>()
 
+                .AddTransient<IFavoriteService, FavoriteService>()
+
                 .AddCodeAnalyze(Configuration)
 
                 .AddHotList(Configuration)

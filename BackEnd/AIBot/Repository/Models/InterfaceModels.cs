@@ -69,6 +69,18 @@ namespace Buaa.AIBot.Repository.Models
         public int QuestionId { get; set; }
     }
 
+
+    public class FavoriteInfo
+    {
+        public int FavoriteId { get; set; }
+        
+        public int CreatorId { get; set; }
+
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public DateTime CreateTime { get; set; }
+    }
+
     public enum TagCategory
     {
         Lang = 1,

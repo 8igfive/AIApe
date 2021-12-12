@@ -108,4 +108,30 @@ namespace Buaa.AIBot.Repository.Exceptions
             : base($"User with uid={uid} has not liked target with id={target} yet.")
         { }
     }
+
+    public class FavoriteNameTooLongException : RepositoryException
+    {
+        public FavoriteNameTooLongException(int actual, int max)
+            : base($"Favorite name has max length={max}, but {actual} get.") { }
+    }
+
+    public class FavoriteNotExistException : RepositoryException
+    {
+        public FavoriteNotExistException(int favoriteId) 
+            : base($"Favorite with fid={favoriteId} is not exist.") { }
+    }
+
+    public class FavoriteHasCollectedTargetException : RepositoryException
+    {
+        public FavoriteHasCollectedTargetException(int fid, int target)
+            : base($"Favorite with fid={fid} has already collected target with id={target}.")
+        { }
+    }
+
+    public class FavoriteNotCollectedTargetException : RepositoryException
+    {
+        public FavoriteNotCollectedTargetException(int fid, int target)
+            : base($"Favorite with fid={fid} has not collected target with id={target} yet.")
+        { }
+    }
 }

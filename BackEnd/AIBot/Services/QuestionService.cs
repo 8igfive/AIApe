@@ -22,6 +22,7 @@ namespace Buaa.AIBot.Services
         private readonly IAnswerRepository answerRepository;
         private readonly ITagRepostory tagRepostory;
         private readonly ILikeRepository likeRepository;
+        private readonly ICollectRepository collectRepository;
         private readonly INLPService nlpService;
 
         public ITagRepostory TagRepostory => tagRepostory;
@@ -32,13 +33,16 @@ namespace Buaa.AIBot.Services
 
         public ILikeRepository LikeRepository => likeRepository;
 
-        public QuestionService(IQuestionRepository questionRepository, IAnswerRepository answerRepository, ITagRepostory tagRepostory, ILikeRepository likeRepository, INLPService nlpService)
+        public ICollectRepository CollectRepository => collectRepository;
+
+        public QuestionService(IQuestionRepository questionRepository, IAnswerRepository answerRepository, ITagRepostory tagRepostory, ILikeRepository likeRepository, INLPService nlpService, ICollectRepository collectRepository)
         {
             this.questionRepository = questionRepository;
             this.answerRepository = answerRepository;
             this.tagRepostory = tagRepostory;
             this.likeRepository = likeRepository;
             this.nlpService = nlpService;
+            this.collectRepository = collectRepository;
         }
 
         public async Task<QuestionInformation> GetQuestionAsync(int qid, int? uid=null)
@@ -80,6 +84,28 @@ namespace Buaa.AIBot.Services
             {
                 throw new Exceptions.QuestionNotExistException(qid, e);
             }
+            bool? collected = null;
+            int collectNum;
+            try
+            {
+                if (uid != null)
+                {
+                    try
+                    {
+                        bool res = await collectRepository.UserCollectedQuestionAsync((int)uid, qid);
+                        collected = res;
+                    }
+                    catch (Repository.Exceptions.UserNotExistException)
+                    {
+                        collected = null;
+                    }
+                }
+                collectNum = await collectRepository.SelectCollectsCountForQuestionAsync(qid);
+            }
+            catch (Repository.Exceptions.QuestionNotExistException e)
+            {
+                throw new Exceptions.QuestionNotExistException(qid, e);
+            }
             return new QuestionInformation()
             {
                 Title = question.Title,
@@ -87,6 +113,8 @@ namespace Buaa.AIBot.Services
                 Creator = question.CreaterId,
                 Like = like,
                 LikeNum = likeNum,
+                Collected = collected,
+                collectNum = collectNum,
                 HotValue = question.HotValue,
                 CreateTime = question.CreateTime,
                 HotFreshTime = question.HotFreshTime,
@@ -125,12 +153,36 @@ namespace Buaa.AIBot.Services
             {
                 throw new Exceptions.AnswerNotExistException(aid, e);
             }
+            bool? collected = null;
+            int collectNum;
+            try
+            {
+                if (uid != null)
+                {
+                    try
+                    {
+                        bool res = await collectRepository.UserCollectedAnswerAsync((int)uid, aid);
+                        collected = res;
+                    }
+                    catch (Repository.Exceptions.UserNotExistException)
+                    {
+                        collected = null;
+                    }
+                }
+                collectNum = await collectRepository.SelectCollectsCountForAnswerAsync(aid);
+            }
+            catch (Repository.Exceptions.AnswerNotExistException e)
+            {
+                throw new Exceptions.AnswerNotExistException(aid, e);
+            }
             return new AnswerInformation()
             {
                 Content = answer.Content,
                 Creator = answer.CreaterId,
                 Like = like,
                 LikeNum = likeNum,
+                Collected = collected,
+                collectNum = collectNum,
                 CreateTime = answer.CreateTime,
                 ModifyTime = answer.ModifyTime
             };

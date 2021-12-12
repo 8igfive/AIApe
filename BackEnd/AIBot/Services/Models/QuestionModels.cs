@@ -15,6 +15,8 @@ namespace Buaa.AIBot.Services.Models
         public int? Creator { get; set; }
         public bool? Like { get; set; }
         public int LikeNum { get; set; }
+        public bool? Collected { get; set; }
+        public int collectNum { get; set; }
         public int HotValue { get; set; }
         [JsonConverter(typeof(DateTimeJsonConverter))]
         public DateTime HotFreshTime { get; set; }
@@ -32,6 +34,8 @@ namespace Buaa.AIBot.Services.Models
         public int? Creator { get; set; }
         public bool? Like { get; set; }
         public int LikeNum { get; set; }
+        public bool? Collected { get; set; }
+        public int collectNum { get; set; }
         [JsonConverter(typeof(DateTimeJsonConverter))]
         public DateTime CreateTime { get; set; }
         [JsonConverter(typeof(DateTimeJsonConverter))]
