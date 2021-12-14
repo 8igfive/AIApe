@@ -160,9 +160,14 @@ namespace Buaa.AIBot.Repository.Implement
             var temp = await Context.FavoriteQuestionRelations
                 .Where(fqr => fqr.QuestionId == qid)
                 .Join(Context.Favorites, fqr => fqr.FavoriteId, f => f.FavoriteId, (fqr, f) => f.UserId)
-                .ToDictionaryAsync(uid => uid, CancellationToken);
+                .ToArrayAsync(CancellationToken);
             CancellationToken.ThrowIfCancellationRequested();
-            return temp.Count;
+            var sTemp = new HashSet<int>();
+            foreach(int i in temp)
+            {
+                sTemp.Add(i);
+            }
+            return sTemp.Count;
         }
 
         public async Task<bool> FavoriteCollectedAnswerAsync(int fid, int aid)
@@ -182,9 +187,14 @@ namespace Buaa.AIBot.Repository.Implement
             var temp = await Context.FavoriteAnswerRelations
                 .Where(far => far.AnswerId == aid)
                 .Join(Context.Favorites, far => far.FavoriteId, f => f.FavoriteId, (far, f) => f.UserId)
-                .ToDictionaryAsync(uid => uid, CancellationToken);
+                .ToArrayAsync(CancellationToken);
             CancellationToken.ThrowIfCancellationRequested();
-            return temp.Count;
+            var sTemp = new HashSet<int>();
+            foreach(int i in temp)
+            {
+                sTemp.Add(i);
+            }
+            return sTemp.Count;
         }
 
         public async Task<bool> UserCollectedQuestionAsync(int uid, int qid)
