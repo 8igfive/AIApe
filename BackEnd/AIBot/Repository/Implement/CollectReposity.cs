@@ -159,11 +159,10 @@ namespace Buaa.AIBot.Repository.Implement
             await CheckQuestionExistAsync(qid);    
             var temp = await Context.FavoriteQuestionRelations
                 .Where(fqr => fqr.QuestionId == qid)
-                .Join(Context.Favorites, fqr => fqr.FavoriteId, f => f.FavoriteId, (fqr, f) => new {f.UserId})
-                .GroupBy(t => t.UserId)
-                .ToArrayAsync(CancellationToken);
+                .Join(Context.Favorites, fqr => fqr.FavoriteId, f => f.FavoriteId, (fqr, f) => f.UserId)
+                .ToDictionaryAsync(uid => uid, CancellationToken);
             CancellationToken.ThrowIfCancellationRequested();
-            return temp.Length;
+            return temp.Count;
         }
 
         public async Task<bool> FavoriteCollectedAnswerAsync(int fid, int aid)
@@ -182,11 +181,10 @@ namespace Buaa.AIBot.Repository.Implement
             await CheckAnswerExistAsync(aid);
             var temp = await Context.FavoriteAnswerRelations
                 .Where(far => far.AnswerId == aid)
-                .Join(Context.Favorites, far => far.FavoriteId, f => f.FavoriteId, (far, f) => new {f.UserId})
-                .GroupBy(t => t.UserId)
-                .ToArrayAsync(CancellationToken);
+                .Join(Context.Favorites, far => far.FavoriteId, f => f.FavoriteId, (far, f) => f.UserId)
+                .ToDictionaryAsync(uid => uid, CancellationToken);
             CancellationToken.ThrowIfCancellationRequested();
-            return temp.Length;
+            return temp.Count;
         }
 
         public async Task<bool> UserCollectedQuestionAsync(int uid, int qid)
