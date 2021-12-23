@@ -41,7 +41,7 @@ namespace Buaa.AIBot.Repository.Implement
             {
                 return query;
             }
-            var favorite = Context.Favorites.FindAsync(favoriteId);
+            var favorite = await Context.Favorites.FindAsync(favoriteId);
             if (favorite == null)
             {
                 return null;
@@ -61,7 +61,7 @@ namespace Buaa.AIBot.Repository.Implement
             {
                 return query;
             }
-            var favorite = Context.Favorites.FindAsync(favoriteId);
+            var favorite = await Context.Favorites.FindAsync(favoriteId);
             if (favorite == null)
             {
                 return null;
@@ -71,7 +71,7 @@ namespace Buaa.AIBot.Repository.Implement
 
         public async Task InsertCollectForQuestionAsync(int fid, int qid)
         {
-            var old = Context.FavoriteQuestionRelations
+            var old = await Context.FavoriteQuestionRelations
                 .Where(fqr => fqr.FavoriteId == fid && fqr.QuestionId == qid)
                 .SingleOrDefaultAsync(CancellationToken);
             if (old != null)
@@ -86,7 +86,7 @@ namespace Buaa.AIBot.Repository.Implement
                 FavoriteId = fid,
                 QuestionId = qid
             };
-            Context.FavoriteQuestionRelations.Add(item);
+            await Context.FavoriteQuestionRelations.AddAsync(item);
             await SaveChangesAgainAndAgainAsync();
         }
 
@@ -108,7 +108,7 @@ namespace Buaa.AIBot.Repository.Implement
 
         public async Task InsertCollectForAnswerAsync(int fid, int aid)
         {
-            var old = Context.FavoriteAnswerRelations
+            var old = await Context.FavoriteAnswerRelations
                 .Where(far => far.FavoriteId == fid && far.AnswerId == aid)
                 .SingleOrDefaultAsync(CancellationToken);
             if (old != null)
@@ -123,7 +123,7 @@ namespace Buaa.AIBot.Repository.Implement
                 FavoriteId = fid,
                 AnswerId = aid
             };
-            Context.FavoriteAnswerRelations.Add(item);
+            await Context.FavoriteAnswerRelations.AddAsync(item);
             await SaveChangesAgainAndAgainAsync();
         }
 
