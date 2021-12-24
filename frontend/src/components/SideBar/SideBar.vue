@@ -1,5 +1,5 @@
 <template>
-    <el-aside width="5vw" v-show="this.$store.state.routerIndex < 7">
+    <el-aside width="5vw" v-show="this.$store.state.routerIndex < 8">
         <div style="display: flex; flex-direction: column; align-items: center">
             <el-popover placement="right-end" trigger="hover" :title="this.$store.state.username" content="欢迎使用AIApe"
                         v-if="this.$store.state.username !== ''">
@@ -22,6 +22,8 @@
                v-show="searchResultExist"></i>
             <i class="el-icon-cpu" :class="(index === 5)? 'selected' : 'unselected'" @click="changePage(5);"
                v-show="this.$store.state.username !== ''"></i>
+            <i class="el-icon-star-off" :class="(index === 7)? 'selected' : 'unselected'" @click="changePage(7);"
+               v-show="this.$store.state.username !== ''"></i>
         </div>
         <i class="el-icon-question" @click="openWelcome"></i>
     </el-aside>
@@ -43,7 +45,7 @@ export default {
             return this.$store.state.searchResult.length > 0;
         },
         avatarSrc() {
-            return 'http://81.70.211.128/aiape/icon-avatar' + this.$store.state.avatarIndex + '.png'
+            return require('../../assets/icon-avatar' + this.$store.state.avatarIndex + '.png')
         }
     },
     methods: {

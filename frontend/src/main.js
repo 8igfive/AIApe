@@ -19,8 +19,7 @@ import './common/font/font.css';
 
 Vue.use(VueParticles);
 Vue.prototype.$axios = axios;
-// const BASE_URL = 'https://aiape.snowphoenix.design';
-const BASE_URL = 'http://test.snowphoenix.design';
+const BASE_URL = 'http://39.105.155.243';
 Vue.prototype.BASE_URL = BASE_URL;
 
 Vue.use(mavonEditor);
@@ -152,6 +151,10 @@ Vue.prototype.$changePage = function (index) {
         }
         case 6: {
             this.$router.replace('/personalCenter');
+            break;
+        }
+        case 7: {
+            this.$router.replace('/favoriteDetail');
             break;
         }
     }

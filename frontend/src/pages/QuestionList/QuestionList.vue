@@ -13,10 +13,10 @@
             <div style="height: auto; overflow: auto; width: 51vw" ref="scroll-body" id="scroll-body"
                  @scroll="loadMore">
                 <el-main class="question-list" v-if="select==='new'">
-                    <div class="question-body" v-for="question in questionList">
+                    <div class="question-body" v-for="(question, questionListId) in questionList">
                         <div class="user">
                             <div style="display: flex; align-items: center">
-                                <el-avatar :src="'http://81.70.211.128/aiape/icon-avatar' + question.avatarIndex + '.png'"
+                                <el-avatar :src="require('../../assets/icon-avatar' + question.avatarIndex + '.png')"
                                            size="small" style="margin-right: 10px"></el-avatar>
                                 {{ question.creator }}
                                 {{ question.avatarIndex }}
@@ -37,7 +37,12 @@
                             </div>
                             <div class="recommend-time">
                                 <el-button class="recommend" type="text"
-                                           :icon="question.like? 'el-icon-star-on' : 'el-icon-star-off'"
+                                           :icon="question.collected? 'el-icon-star-on' : 'el-icon-star-off'"
+                                           @click="openCollectDialog(questionListId)">
+                                    收藏{{ question.collectNum }}
+                                </el-button>
+                                <el-button class="recommend" type="text"
+                                           :icon="question.like? 'el-icon-success' : 'el-icon-circle-check'"
                                            @click="like(question)">
                                     推荐{{ question.likeNum }}
                                 </el-button>
@@ -50,7 +55,7 @@
                     <div class="question-body" v-for="question in hots">
                         <div class="user">
                             <div style="display: flex; align-items: center">
-                                <el-avatar :src="'http://81.70.211.128/aiape/icon-avatar' + question.avatarIndex + '.png'"
+                                <el-avatar :src="require('../../assets/icon-avatar' + question.avatarIndex + '.png')"
                                            size="small" style="margin-right: 10px"></el-avatar>
                                 {{ question.creator }}
                             </div>
@@ -67,6 +72,11 @@
                             </div>
                             <div class="recommend-time">
                                 <el-button class="recommend" type="text"
+                                           :icon="question.collected? 'el-icon-star-on' : 'el-icon-star-off'"
+                                           @click="openCollectDialog(questionListId)">
+                                    收藏{{ question.collectNum }}
+                                </el-button>
+                                <el-button class="recommend" type="text"
                                            :icon="question.like? 'el-icon-star-on' : 'el-icon-star-off'"
                                            @click="like(question)">
                                     推荐{{ question.likeNum }}
@@ -79,6 +89,17 @@
             </div>
         </el-container>
         <ListSideBar/>
+        <el-dialog title="收藏" :visible.sync="collectDialogVisible" @close="cancelCollectDialog()">
+            <el-form label-position="right">
+                <el-checkbox-group v-model="fidList">
+                    <el-checkbox class="favorite-checkbox" v-for="favorite in favorites" :label="favorite.fid" :key="favorite.fid">{{favorite.name}}</el-checkbox>
+                </el-checkbox-group>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="cancelCollectDialog()">取 消</el-button>
+                <el-button type="primary" @click="collect()">确 定</el-button>
+            </div>
+        </el-dialog>
     </el-container>
 </template>
 
@@ -104,7 +125,13 @@ export default {
             no_more: false,
             likeValid: true,
             getHotValid: true,
-            getQuestionsValid: true
+            getQuestionsValid: true,
+            getFavoriteValid: true,
+            favorites: [],
+            collectValid: true,
+            fidList: [],
+            collectDialogVisible: false,
+            collectQuestionListId: null,
         }
     },
     mounted() {
@@ -113,8 +140,108 @@ export default {
     },
     created() {
         this.getQuestions();
+        this.getFavorites();
+    },
+    activated() {
+        this.getQuestions();
+        this.getFavorites();
+        this.initTagState();
+        this.isAdmin = (this.$store.state.auth === 2);
     },
     methods: {
+                async collect() {
+            if (!this.collectValid) {
+                this.$message({
+                    message: '操作过于频繁!',
+                    type: 'warning'
+                });
+            }
+            this.collectValid = false;
+            let _this = this;
+            let collectQuestionListId = _this.collectQuestionListId;
+            let question = _this.questionList[collectQuestionListId];
+            let qid = question.id;
+            let fidList = _this.fidList;
+            if (fidList.length == 0) {
+                this.$message({
+                    message: '未选择收藏夹!',
+                    type: 'warning'
+                });
+            } else {
+                for (let fid of fidList) {
+                    await this.$axios.post(this.BASE_URL + '/api/favorites/collect_question', {
+                        fid: fid,
+                        qid: qid,
+                        markAsFavorite: true
+                    }, {
+                        headers: {
+                            Authorization: 'Bearer ' + _this.$store.state.token,
+                            type: 'application/json;charset=utf-8'
+                        }
+                    })
+                        .then(async function (response) {
+                            _this.questionList[collectQuestionListId].collected = response.data.collected;
+                            _this.questionList[collectQuestionListId].collectNum = response.data.collectNum;
+                            _this.$message({
+                                type: 'success',
+                                message: '收藏成功!'
+                            });
+                        })
+                        .catch(function (error) {
+                            console.log(error)
+                            _this.$message({
+                                message: '登录后才可以收藏~!',
+                                type: 'warning'
+                            })
+                        })
+                }
+                _this.cancelCollectDialog();
+            }
+            this.collectValid = true;
+        },
+        async getFavorites() {
+            if (!this.getFavoriteValid) {
+                return;
+            }
+
+            this.getFavoriteValid = false;
+            let _this = this;
+            await this.$axios.get(this.BASE_URL + '/api/user/favorites', {
+                headers: {
+                    Authorization: 'Bearer ' + _this.$store.state.token,
+                    type: 'application/json;charset=utf-8'
+                }
+            })
+                .then(async function (response) {
+                    _this.favorites = [];
+                    let FIDList = response.data.favorites;
+                    for (let fid of FIDList) {
+                        let favorite = {
+                            fid: fid
+                        };
+                        await _this.$axios.get(_this.BASE_URL + '/api/favorites/favorite?fid=' + fid, {
+                            headers: {
+                                Authorization: 'Bearer ' + _this.$store.state.token,
+                                type: 'application/json;charset=utf-8'
+                            }
+                        })
+                            .then(function (response) {
+                                favorite.name = response.data.favorite.name;
+                            })
+                        _this.favorites.push(favorite);
+                    }
+                })
+            this.getFavoriteValid = true;
+        },
+        openCollectDialog(questionListId) {
+            this.collectQuestionListId = questionListId;
+            this.collectDialogVisible = true;
+        },
+        cancelCollectDialog() {
+            this.collectDialogVisible = false;
+            this.collectQuestionListId = null;
+            this.fidList = [];
+        },
         handleSelect(selector) {
             this.$refs['scroll-body'].scrollTop = 0;
             this.select = selector;
@@ -168,7 +295,9 @@ export default {
                                     date: response.data.question.createTime,
                                     likeNum: response.data.question.likeNum,
                                     like: response.data.question.like,
-                                    creatorId: response.data.question.creator
+                                    creatorId: response.data.question.creator,
+                                    collectNum: response.data.question.collectNum,
+                                    collected: response.data.question.collected,
                                 };
                                 let uid = response.data.question.creator;
                                 await _this.$axios.get(_this.BASE_URL + '/api/user/public_info?uid=' + uid)
@@ -262,7 +391,9 @@ export default {
                                     tags: response.data.question.tags,
                                     date: response.data.question.createTime,
                                     likeNum: response.data.question.likeNum,
-                                    like: response.data.question.like
+                                    like: response.data.question.like,
+                                    collectNum: response.data.question.collectNum,
+                                    collected: response.data.question.collected,
                                 };
                                 let uid = response.data.question.creator;
                                 await _this.$axios.get(_this.BASE_URL + '/api/user/public_info?uid=' + uid)
@@ -391,6 +522,30 @@ export default {
                         _this.hots[i].like = response.data.question.like;
                     })
             }
+            for (let i = 0; i < _this.questionList.length - 1; i++) {
+                let qid = _this.questionList[i].id;
+                _this.$axios.get(_this.BASE_URL + '/api/questions/question?qid=' + qid, {
+                    headers: {
+                        Authorization: 'Bearer ' + _this.$store.state.token,
+                        type: 'application/json;charset=utf-8'
+                    }
+                })
+                    .then(function (response) {
+                        _this.questionList[i].collected = response.data.question.collected;
+                    })
+            }
+            for (let i = 0; i < _this.hots.length - 1; i++) {
+                let qid = _this.hots[i].id;
+                _this.$axios.get(_this.BASE_URL + '/api/questions/question?qid=' + qid, {
+                    headers: {
+                        Authorization: 'Bearer ' + _this.$store.state.token,
+                        type: 'application/json;charset=utf-8'
+                    }
+                })
+                    .then(function (response) {
+                        _this.hots[i].collected = response.data.question.collected;
+                    })
+            }
         },
         selectedTag: function () {
             this.no_more = false;
@@ -401,6 +556,13 @@ export default {
 </script>
 
 <style scoped>
+.favorite-checkbox {
+    height: 24px;
+    line-height: 24px;
+    font-size: 24px;
+    display: block;
+}
+
 .shell {
     position: absolute;
     left: 5vw;

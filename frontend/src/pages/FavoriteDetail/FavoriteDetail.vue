@@ -2,22 +2,19 @@
     <el-container class="shell">
         <el-container class="list">
             <el-header>
-                AIApe
+                {{ name }}
             </el-header>
             <el-main class="selector">
-                <el-button type="text" :class="{'unselected': select != 'question'}" @click="handleSelect('question')">
-                    我的提问
+                <el-button type="text" :class="{'unselected': select === 'answer'}" @click="handleSelect('question')">
+                    收藏的提问
                 </el-button>
-                <el-button type="text" :class="{'unselected': select != 'answer'}" @click="handleSelect('answer')">
-                    我的回答
-                </el-button>
-                <el-button type="text" :class="{'unselected': select != 'favorite'}" @click="handleSelect('favorite')">
-                    我的收藏
+                <el-button type="text" :class="{'unselected': select === 'question'}" @click="handleSelect('answer')">
+                    收藏的回答
                 </el-button>
             </el-main>
             <div style="height: auto; overflow: auto; width: 51vw" ref="scroll-body" id="scroll-body">
                 <el-main class="question-list" v-if="select==='question'">
-                    <div class="question-body" v-for="(question, questionListId) in questions">
+                    <div class="question-body" v-for="question in questions">
                         <i class="el-icon-delete" v-show="authority > 1 || currentUid === question.creatorId"
                            @click="deleteQuestion(question)"></i>
                         <el-link class='title' @click="goToDetail(question.id)" :underline="false">
@@ -32,12 +29,12 @@
                             </div>
                             <div class="recommend-time">
                                 <el-button class="recommend" type="text"
-                                           :icon="question.collected? 'el-icon-star-on' : 'el-icon-star-off'"
-                                           @click="openCollectQDialog(questionListId)">
-                                    收藏{{ question.collectNum }}
+                                       icon="el-icon-star-on"
+                                       @click="cancelCollectQ(question)">
+                                    取消收藏{{ question.collectNum }}
                                 </el-button>
                                 <el-button class="recommend" type="text"
-                                           :icon="question.like? 'el-icon-success' : 'el-icon-circle-check'"
+                                           :icon="question.like? 'el-icon-star-on' : 'el-icon-star-off'"
                                            @click="like(question)">
                                     推荐{{ question.likeNum }}
                                 </el-button>
@@ -46,8 +43,8 @@
                         </div>
                     </div>
                 </el-main>
-                <el-main class="question-list" v-else-if="select==='answer'">
-                    <div class="question-body" v-for="(answer, answerListId) in answers">
+                <el-main class="question-list" v-else>
+                    <div class="question-body" v-for="answer in answers">
                         <i class="el-icon-delete" v-show="authority > 1 || currentUid === answer.creatorId"
                            @click="deleteAnswer(answer)"></i>
                         <el-link class='title' @click="goToDetail(answer.questionId)" :underline="false">
@@ -62,9 +59,9 @@
                             </div>
                             <div class="recommend-time">
                                 <el-button class="recommend" type="text"
-                                           :icon="answer.collected? 'el-icon-star-on' : 'el-icon-star-off'"
-                                           @click="openCollectADialog(answerListId)">
-                                    收藏{{ answer.collectNum }}
+                                       icon="el-icon-star-on"
+                                       @click="cancelCollectA(answer)">
+                                    取消收藏{{ answer.collectNum }}
                                 </el-button>
                                 <el-button class="recommend" type="text"
                                            :icon="answer.like? 'el-icon-star-on' : 'el-icon-star-off'"
@@ -74,34 +71,6 @@
                                 <span>{{ answer.createTime }}</span>
                             </div>
                         </div>
-                    </div>
-                </el-main>
-                <el-main class="question-list" v-else>
-                    <div class="question-body" v-for="favorite in favorites">
-                        <i class="el-icon-delete" v-show="authority > 1 || currentUid === favorite.creatorId"
-                           @click="deleteFavorite(favorite)"></i>
-                        <el-link class='title' @click="goToFavoriteDetail(favorite.fid)" :underline="false">
-                            {{ favorite.name }}
-                        </el-link>
-                        <div class="content">
-                            {{ favorite.description }}
-                        </div>
-                        <div class="other-info">
-                            <div class="tags">
-                            </div>
-                            <div class="recommend-time">
-                                <div class="recommend">
-                                    收藏问题数{{ favorite.questions.length }}
-                                </div>
-                                <div class="recommend">
-                                    收藏回答数{{ favorite.answers.length }}
-                                </div>
-                                <span>{{ favorite.createTime }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="new-favorite">
-                        <el-button type="primary" @click="createFavoriteVisible = true">创建收藏夹</el-button>
                     </div>
                 </el-main>
             </div>
@@ -140,42 +109,6 @@
             </span>
             </el-main>
         </el-aside>
-        <el-dialog title="收藏" :visible.sync="collectDialogQVisible" @close="cancelCollectQDialog()">
-            <el-form label-position="right">
-                <el-checkbox-group v-model="fidList">
-                    <el-checkbox class="favorite-checkbox" v-for="favorite in favorites" :label="favorite.fid" :key="favorite.fid">{{favorite.name}}</el-checkbox>
-                </el-checkbox-group>
-            </el-form>
-            <div slot="footer" class="dialog-footer">
-                <el-button @click="cancelCollectQDialog()">取 消</el-button>
-                <el-button type="primary" @click="collectQ()">确 定</el-button>
-            </div>
-        </el-dialog>
-        <el-dialog title="收藏" :visible.sync="collectDialogAVisible" @close="cancelCollectADialog()">
-            <el-form label-position="right">
-                <el-checkbox-group v-model="fidList">
-                    <el-checkbox class="favorite-checkbox" v-for="favorite in favorites" :label="favorite.fid" :key="favorite.fid">{{favorite.name}}</el-checkbox>
-                </el-checkbox-group>
-            </el-form>
-            <div slot="footer" class="dialog-footer">
-                <el-button @click="cancelCollectADialog()">取 消</el-button>
-                <el-button type="primary" @click="collectA()">确 定</el-button>
-            </div>
-        </el-dialog>
-        <el-dialog title="创建收藏夹" :visible.sync="createFavoriteVisible" @close="cancelCreateFavorite()">
-            <el-form :model="newFavorite" label-position="right">
-                <el-form-item label="收藏夹名称" :label-width="formLabelWidth">
-                    <el-input v-model="newFavorite.name" autocomplete="off" placeholder="不超过150字符"></el-input>
-                </el-form-item>
-                <el-form-item label="收藏夹描述" :label-width="formLabelWidth">
-                    <el-input type="textarea" rows="6" v-model="newFavorite.description" autocomplete="off"></el-input>
-                </el-form-item>
-            </el-form>
-            <div slot="footer" class="dialog-footer">
-                <el-button @click="cancelCreateFavorite()">取 消</el-button>
-                <el-button type="primary" @click="createFavorite()">确 定</el-button>
-            </div>
-        </el-dialog>
     </el-container>
 </template>
 
@@ -192,253 +125,101 @@ export default {
             question: '',
             email: '',
             uid: 0,
+            fid: 0,
+            name: '',
+            description: '',
+            questionList: [],
+            answerList: [],
             likeValid: true,
             getQuestionValid: true,
             getAnswerValid: true,
-            getFavoriteValid: true,
-            favorites: [],
-            createFavoriteVisible: false,
-            newFavorite: {
-                name: '',
-                description: '',
-            },
-            formLabelWidth: '100px',
-            collectValid: true,
-            fidList: [],
-            collectDialogQVisible: false,
-            collectDialogAVisible: false,
-            collectQuestionListId: null,
-            collectAnswerListId: null,
+            cancelCollectQValid: true,
+            cancelCollectAValid: true,
         }
     },
     methods: {
-        async getFavorites() {
-            if (!this.getFavoriteValid) {
-                return;
-            }
-
-            this.getFavoriteValid = false;
-            let _this = this;
-            await this.$axios.get(this.BASE_URL + '/api/user/favorites', {
-                headers: {
-                    Authorization: 'Bearer ' + _this.$store.state.token,
-                    type: 'application/json;charset=utf-8'
-                }
-            })
-                .then(async function (response) {
-                    _this.favorites = [];
-                    let FIDList = response.data.favorites;
-                    for (let fid of FIDList) {
-                        let favorite = {
-                            fid: fid
-                        };
-                        await _this.$axios.get(_this.BASE_URL + '/api/favorites/favorite?fid=' + fid, {
-                            headers: {
-                                Authorization: 'Bearer ' + _this.$store.state.token,
-                                type: 'application/json;charset=utf-8'
-                            }
-                        })
-                            .then(function (response) {
-                                favorite.name = response.data.favorite.name;
-                                favorite.description = response.data.favorite.description;
-                                favorite.questions = response.data.favorite.questions;
-                                favorite.answers = response.data.favorite.answers;
-                                favorite.createTime = response.data.favorite.createTime;
-                            })
-                        _this.favorites.push(favorite);
-                    }
-                })
-            this.getFavoriteValid = true;
-        },
-        openCollectQDialog(questionListId) {
-            this.collectQuestionListId = questionListId;
-            this.collectDialogQVisible = true;
-        },
-        openCollectADialog(answerListId) {
-            this.collectAnswerListId = answerListId;
-            this.collectDialogAVisible = true;
-        },
-        cancelCollectQDialog() {
-            this.collectDialogQVisible = false;
-            this.collectQuestionListId = null;
-            this.fidList = [];
-        },
-        cancelCollectADialog() {
-            this.collectDialogAVisible = false;
-            this.collectAnswerListId = null;
-            this.fidList = [];
-        },
-        async collectQ() {
-            if (!this.collectValid) {
+        async cancelCollectQ(question) {
+            if (!this.cancelCollectQValid) {
                 this.$message({
                     message: '操作过于频繁!',
                     type: 'warning'
                 });
             }
-            this.collectValid = false;
+            this.cancelCollectQValid = false;
             let _this = this;
-            let collectQuestionListId = _this.collectQuestionListId;
-            let question = _this.questions[collectQuestionListId];
+            let fid = _this.fid
             let qid = question.id;
-            let fidList = _this.fidList;
-            if (fidList.length == 0) {
-                this.$message({
-                    message: '未选择收藏夹!',
-                    type: 'warning'
-                });
-            } else {
-                for (let fid of fidList) {
-                    await this.$axios.post(this.BASE_URL + '/api/favorites/collect_question', {
-                        fid: fid,
-                        qid: qid,
-                        markAsFavorite: true
-                    }, {
-                        headers: {
-                            Authorization: 'Bearer ' + _this.$store.state.token,
-                            type: 'application/json;charset=utf-8'
-                        }
-                    })
-                        .then(async function (response) {
-                            _this.questions[collectQuestionListId].collected = response.data.collected;
-                            _this.questions[collectQuestionListId].collectNum = response.data.collectNum;
-                            _this.$message({
-                                type: 'success',
-                                message: '收藏成功!'
-                            });
-                        })
-                        .catch(function (error) {
-                            _this.$message({
-                                message: '登录后才可以收藏~!',
-                                type: 'warning'
-                            })
-                        })
-                }
-                _this.cancelCollectQDialog();
-            }
-            this.collectValid = true;
-        },
-        async collectA() {
-            if (!this.collectValid) {
-                this.$message({
-                    message: '操作过于频繁!',
-                    type: 'warning'
-                });
-            }
-            this.collectValid = false;
-            let _this = this;
-            let collectAnswerListId = _this.collectAnswerListId;
-            let answer = _this.answers[collectAnswerListId];
-            let aid = answer.answerId;
-            let fidList = _this.fidList;
-            if (fidList.length == 0) {
-                this.$message({
-                    message: '未选择收藏夹!',
-                    type: 'warning'
-                });
-            } else {
-                for (let fid of fidList) {
-                    await this.$axios.post(this.BASE_URL + '/api/favorites/collect_answer', {
-                        fid: fid,
-                        aid: aid,
-                        markAsFavorite: true
-                    }, {
-                        headers: {
-                            Authorization: 'Bearer ' + _this.$store.state.token,
-                            type: 'application/json;charset=utf-8'
-                        }
-                    })
-                        .then(async function (response) {
-                            _this.answers[collectAnswerListId].collected = response.data.collected;
-                            _this.answers[collectAnswerListId].collectNum = response.data.collectNum;
-                            _this.$message({
-                                type: 'success',
-                                message: '收藏成功!'
-                            });
-                        })
-                        .catch(function (error) {
-                            _this.$message({
-                                message: '登录后才可以收藏~!',
-                                type: 'warning'
-                            })
-                        })
-                }
-                _this.cancelCollectADialog();
-            }
-            this.collectValid = true;
-        },
-        cancelCreateFavorite() {
-            this.createFavoriteVisible = false;
-            this.newFavorite.name = '';
-            this.newFavorite.description = '';
-        },
-        createFavorite() {
-            let _this = this;
-            _this.$axios.post(_this.BASE_URL + "/api/favorites/add_favorite", {
-                name: _this.$data.newFavorite.name,
-                description: _this.$data.newFavorite.description
+            this.$axios.post(this.BASE_URL + '/api/favorites/collect_question', {
+                fid: fid,
+                qid: qid,
+                markAsFavorite: false
             }, {
                 headers: {
                     Authorization: 'Bearer ' + _this.$store.state.token,
                     type: 'application/json;charset=utf-8'
                 }
             })
-            .then((response) => {
-                _this.$message({
-                    message: '创建收藏夹成功!',
-                    type: 'success'
-                });
-                this.getFavorites();
-                this.createFavoriteVisible = false;
-                this.newFavorite.name = '';
-                this.newFavorite.description = '';
-            })
-            .catch((error) => {
-                console.log(error);
-                _this.$message({
-                    message: '头像更换失败!',
-                    type: 'error'
+                .then(async function (response) {
+                    _this.getQuestions();
                 })
-            })
-        },
-        goToFavoriteDetail(fid) {
-            this.$store.commit('setFavoriteID', fid);
-            this.$changePage(7);
-        },
-        deleteFavorite(favorite) {
-            let _this = this;
-            this.$confirm('此操作将永久删除该收藏夹, 是否继续?', '删除确认', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
-                type: 'warning'
-            }).then(() => {
-                this.$axios.delete(this.BASE_URL + '/api/favorites/delete_favorite', {
-                    data: {
-                        fid: favorite.fid,
-                    },
-                    headers: {
-                        Authorization: 'Bearer ' + _this.$store.state.token,
-                        type: 'application/json;charset=utf-8'
-                    }
+                .catch(function (error) {
+                    console.log(error);
+                    _this.$message({
+                        message: '登录后才可以取消收藏~!',
+                        type: 'warning'
+                    })
                 })
-                    .then(response => {
-                        this.$message({
-                            type: 'success',
-                            message: '删除成功!'
-                        });
-                        this.getFavorites();
-                    })
-                    .catch(error => {
-                        this.$message({
-                            type: 'error',
-                            message: '删除失败!'
-                        });
-                    })
-            }).catch(() => {
+            this.cancelCollectQValid = true;
+        },
+        async cancelCollectA(answer) {
+            if (!this.cancelCollectAValid) {
                 this.$message({
-                    type: 'info',
-                    message: '已取消删除'
+                    message: '操作过于频繁!',
+                    type: 'warning'
                 });
+            }
+            this.cancelCollectAValid = false;
+            let _this = this;
+            let fid = _this.fid
+            let aid = answer.answerId;
+            this.$axios.post(this.BASE_URL + '/api/favorites/collect_answer', {
+                fid: fid,
+                aid: aid,
+                markAsFavorite: false
+            }, {
+                headers: {
+                    Authorization: 'Bearer ' + _this.$store.state.token,
+                    type: 'application/json;charset=utf-8'
+                }
             })
+                .then(async function (response) {
+                    _this.getAnswers();
+                })
+                .catch(function (error) {
+                    console.log(error);
+                    _this.$message({
+                        message: '登录后才可以取消收藏~!',
+                        type: 'warning'
+                    })
+                })
+            this.cancelCollectAValid = true;
+        },
+        async getFavoriteDetail() {
+            let _this = this;
+            _this.fid = this.$store.state.favoriteID;
+            _this.$axios.get(_this.BASE_URL + "/api/favorites/favorite?fid=" + _this.fid, {
+                headers: {
+                    Authorization: 'Bearer ' + _this.$store.state.token,
+                    type: 'application/json;charset=utf-8'
+                }
+            })
+                .then(async function (response) {
+                    _this.name = response.data.favorite.name;
+                    _this.description = response.data.favorite.description;
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
         },
         changeAvatar(index) {
             let _this = this;
@@ -472,8 +253,6 @@ export default {
                 this.getAnswers();
             } else if (selector === 'question') {
                 this.getQuestions();
-            } else if (selector === 'favorite') {
-                this.getFavorites();
             }
         },
         goToDetail(qid) {
@@ -557,14 +336,14 @@ export default {
             this.getQuestionValid = false;
             let _this = this;
 
-            await this.$axios.get(this.BASE_URL + '/api/user/questions', {
+            await this.$axios.get(_this.BASE_URL + "/api/favorites/favorite?fid=" + _this.fid, {
                 headers: {
                     Authorization: 'Bearer ' + _this.$store.state.token,
                     type: 'application/json;charset=utf-8'
                 }
             })
                 .then(async function (response) {
-                    let questionList = response.data.questions;
+                    let questionList = response.data.favorite.questions;
                     _this.questions = [];
                     for (let qid of questionList) {
                         await _this.$axios.get(_this.BASE_URL + '/api/questions/question?qid=' + qid, {
@@ -604,7 +383,7 @@ export default {
 
             this.getAnswerValid = false;
             let _this = this;
-            await this.$axios.get(this.BASE_URL + '/api/user/answers', {
+            await this.$axios.get(_this.BASE_URL + "/api/favorites/favorite?fid=" + _this.fid, {
                 headers: {
                     Authorization: 'Bearer ' + _this.$store.state.token,
                     type: 'application/json;charset=utf-8'
@@ -612,13 +391,28 @@ export default {
             })
                 .then(async function (response) {
                     _this.answers = [];
-                    let QAList = response.data.answers;
+                    let QAList = response.data.favorite.answers;
                     for (let qa of QAList) {
                         let answer = {
-                            questionId: qa.qid,
-                            answerId: qa.aid
+                            answerId: qa
                         };
-                        await _this.$axios.get(_this.BASE_URL + '/api/questions/question?qid=' + qa.qid, {
+                        await _this.$axios.get(_this.BASE_URL + '/api/questions/answer?aid=' + qa, {
+                            headers: {
+                                Authorization: 'Bearer ' + _this.$store.state.token,
+                                type: 'application/json;charset=utf-8'
+                            }
+                        })
+                            .then(function (response) {
+                                answer.questionId = response.data.answer.questionId;
+                                answer.content = response.data.answer.content;
+                                answer.createTime = response.data.answer.createTime;
+                                answer.likeNum = response.data.answer.likeNum;
+                                answer.like = response.data.answer.like;
+                                answer.creatorId = response.data.answer.creator;
+                                answer.collectNum = response.data.answer.collectNum;
+                                answer.collected = response.data.answer.collected;
+                            })
+                        await _this.$axios.get(_this.BASE_URL + '/api/questions/question?qid=' + answer.questionId, {
                             headers: {
                                 Authorization: 'Bearer ' + _this.$store.state.token,
                                 type: 'application/json;charset=utf-8'
@@ -628,24 +422,10 @@ export default {
                                 answer.title = response.data.question.title;
                                 answer.tags = response.data.question.tags;
                             })
-                        await _this.$axios.get(_this.BASE_URL + '/api/questions/answer?aid=' + qa.aid, {
-                            headers: {
-                                Authorization: 'Bearer ' + _this.$store.state.token,
-                                type: 'application/json;charset=utf-8'
-                            }
-                        })
-                            .then(function (response) {
-                                answer.content = response.data.answer.content;
-                                answer.createTime = response.data.answer.createTime;
-                                answer.likeNum = response.data.answer.likeNum;
-                                answer.like = response.data.answer.like;
-                                answer.creatorId = response.data.answer.creator;
-                                answer.collectNum = response.data.answer.collectNum;
-                                answer.collected = response.data.answer.collected;
-                            })
                         _this.answers.push(answer);
                     }
                 })
+            console.log(this.answers);
             this.getAnswerValid = true;
         },
         async likeAnswer(answer) {
@@ -718,11 +498,27 @@ export default {
             })
         },
     },
-    created() {
+    activated() {
         let _this = this;
+        this.getFavoriteDetail();
         this.getQuestions();
         this.getAnswers();
-        this.getFavorites();
+        this.$axios.get(this.BASE_URL + '/api/user/internal_info', {
+            headers: {
+                Authorization: 'Bearer ' + _this.$store.state.token,
+                type: 'application/json;charset=utf-8'
+            }
+        })
+            .then(function (response) {
+                _this.email = response.data.email;
+                _this.uid = response.data.uid;
+            })
+    },
+    created() {
+        let _this = this;
+        this.getFavoriteDetail();
+        this.getQuestions();
+        this.getAnswers();
         this.$axios.get(this.BASE_URL + '/api/user/internal_info', {
             headers: {
                 Authorization: 'Bearer ' + _this.$store.state.token,
@@ -743,25 +539,29 @@ export default {
         },
         avatarSrc() {
             return require('../../assets/icon-avatar' + this.$store.state.avatarIndex + '.png')
+        },
+        favoriteId() {
+            return this.$store.state.favoriteID;
+        }
+    },
+    watch: {
+        currentUid() {
+            for (let answer of this.answers) {
+                if (answer.creator === this.currentUid) {
+                    this.myAnswer = answer.content;
+                    this.myAnswerId = answer.id;
+                    break;
+                }
+            }
+        },
+        favoriteId() {
+            this.getFavoriteDetail();
         }
     }
 }
 </script>
 
 <style scoped>
-.favorite-checkbox {
-    height: 24px;
-    line-height: 24px;
-    font-size: 24px;
-    display: block;
-}
-
-.new-favorite {
-    flex-direction: column;
-    text-align: center;
-    margin: 10px auto;
-}
-
 .shell {
     position: absolute;
     left: 5vw;
@@ -897,8 +697,8 @@ export default {
 
 .recommend {
     height: 20px;
-    font-size: 15px;
-    line-height: 15px;
+    font-size: 10px;
+    line-height: 20px;
     padding: 3px 3px;
     margin-right: 20px;
     align-items: center;
