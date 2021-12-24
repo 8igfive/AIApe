@@ -11,7 +11,7 @@
                 <div class="question-body" v-for="question in questions">
                     <div class="user">
                         <div style="display: flex; align-items: center">
-                            <el-avatar :src="'http://81.70.211.128/aiape/icon-avatar' + question.avatarIndex + '.png'"
+                            <el-avatar :src="require('../../assets/icon-avatar' + question.avatarIndex + '.png')"
                                        size="small" style="margin-right: 10px"></el-avatar>
                             {{ question.creator }}
                         </div>

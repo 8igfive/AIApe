@@ -4,7 +4,7 @@
             <el-main class="question-detail">
                 <div v-show="questionState === 'preview'" class="user">
                     <div style="display: flex; align-items: center">
-                        <el-avatar :src="'http://81.70.211.128/aiape/icon-avatar' + avatarIndex + '.png'"
+                        <el-avatar :src="require('../../assets/icon-avatar' + avatarIndex + '.png')"
                                    size="small" style="margin-right: 10px"></el-avatar>
                         {{ creatorName }}
                     </div>
@@ -38,6 +38,11 @@
                         <el-button style="margin-right: 10px" :icon="icon" size="mini"
                                    @click="answerAreaMove">我要回答
                         </el-button>
+                        <el-button class="recommend" type="text"
+                                   :icon="collected? 'el-icon-star-on' : 'el-icon-star-off'"
+                                   @click="openCollectQDialog()">
+                            收藏{{ collectNum }}
+                        </el-button>
                         <el-button class="recommend"
                                    :icon="like? 'el-icon-star-on' : 'el-icon-star-off'"
                                    @click="like_question()" size="mini" type="text">
@@ -60,10 +65,10 @@
                 </div>
             </el-collapse-transition>
             <el-main class="answers">
-                <div class="answer" v-for="answer in answers">
+                <div class="answer" v-for="(answer, answerListId) in answers">
                     <div class="user">
                         <div style="display: flex; align-items: center">
-                            <el-avatar :src="'http://81.70.211.128/aiape/icon-avatar' + answer.avatarIndex + '.png'"
+                            <el-avatar :src="require('../../assets/icon-avatar' + answer.avatarIndex + '.png')"
                                        size="small" style="margin-right: 10px"></el-avatar>
                             {{ answer.creatorName }}
                         </div>
@@ -81,6 +86,11 @@
                                    v-if="currentUid === answer.creator" @click="answerAreaMove">
                         </el-button>
                         <el-button class="recommend" type="text"
+                                   :icon="answer.collected? 'el-icon-star-on' : 'el-icon-star-off'"
+                                   @click="openCollectADialog(answerListId)">
+                            收藏{{ answer.collectNum }}
+                        </el-button>
+                        <el-button class="recommend" type="text"
                                    :icon="answer.like? 'el-icon-star-on' : 'el-icon-star-off'"
                                    @click="like_answer(answer)">
                             推荐{{ answer.likeNum }}
@@ -91,6 +101,28 @@
             </el-main>
         </el-container>
         <DetailSideBar/>
+        <el-dialog title="收藏" :visible.sync="collectDialogQVisible" @close="cancelCollectQDialog()">
+            <el-form label-position="right">
+                <el-checkbox-group v-model="fidList">
+                    <el-checkbox class="favorite-checkbox" v-for="favorite in favorites" :label="favorite.fid" :key="favorite.fid">{{favorite.name}}</el-checkbox>
+                </el-checkbox-group>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="cancelCollectQDialog()">取 消</el-button>
+                <el-button type="primary" @click="collectQ()">确 定</el-button>
+            </div>
+        </el-dialog>
+        <el-dialog title="收藏" :visible.sync="collectDialogAVisible" @close="cancelCollectADialog()">
+            <el-form label-position="right">
+                <el-checkbox-group v-model="fidList">
+                    <el-checkbox class="favorite-checkbox" v-for="favorite in favorites" :label="favorite.fid" :key="favorite.fid">{{favorite.name}}</el-checkbox>
+                </el-checkbox-group>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="cancelCollectADialog()">取 消</el-button>
+                <el-button type="primary" @click="collectA()">确 定</el-button>
+            </div>
+        </el-dialog>
     </el-container>
 </template>
 
@@ -164,10 +196,171 @@ export default {
             modifyAnswerId: -1,
             icon: 'el-icon-edit-outline',
             myAnswer: '',
-            myAnswerId: -1
+            myAnswerId: -1,
+            collected: false,
+            collectNum: 0,
+            collectValid: true,
+            fidList: [],
+            collectDialogQVisible: false,
+            collectDialogAVisible: false,
+            collectQuestionListId: null,
+            collectAnswerListId: null,
+            getFavoriteValid: true,
+            favorites: [],
         }
     },
     methods: {
+        async getFavorites() {
+            if (!this.getFavoriteValid) {
+                return;
+            }
+
+            this.getFavoriteValid = false;
+            let _this = this;
+            await this.$axios.get(this.BASE_URL + '/api/user/favorites', {
+                headers: {
+                    Authorization: 'Bearer ' + _this.$store.state.token,
+                    type: 'application/json;charset=utf-8'
+                }
+            })
+                .then(async function (response) {
+                    _this.favorites = [];
+                    let FIDList = response.data.favorites;
+                    for (let fid of FIDList) {
+                        let favorite = {
+                            fid: fid
+                        };
+                        await _this.$axios.get(_this.BASE_URL + '/api/favorites/favorite?fid=' + fid, {
+                            headers: {
+                                Authorization: 'Bearer ' + _this.$store.state.token,
+                                type: 'application/json;charset=utf-8'
+                            }
+                        })
+                            .then(function (response) {
+                                favorite.name = response.data.favorite.name;
+                                favorite.description = response.data.favorite.description;
+                                favorite.questions = response.data.favorite.questions;
+                                favorite.answers = response.data.favorite.answers;
+                                favorite.createTime = response.data.favorite.createTime;
+                            })
+                        _this.favorites.push(favorite);
+                    }
+                })
+            this.getFavoriteValid = true;
+        },
+        openCollectQDialog() {
+            this.collectDialogQVisible = true;
+        },
+        openCollectADialog(answerListId) {
+            this.collectAnswerListId = answerListId;
+            this.collectDialogAVisible = true;
+        },
+        cancelCollectQDialog() {
+            this.collectDialogQVisible = false;
+            this.fidList = [];
+        },
+        cancelCollectADialog() {
+            this.collectDialogAVisible = false;
+            this.collectAnswerListId = null;
+            this.fidList = [];
+        },
+        async collectQ() {
+            if (!this.collectValid) {
+                this.$message({
+                    message: '操作过于频繁!',
+                    type: 'warning'
+                });
+            }
+            this.collectValid = false;
+            let _this = this;
+            let qid = this.$store.state.questionID;
+            let fidList = _this.fidList;
+            if (fidList.length == 0) {
+                this.$message({
+                    message: '未选择收藏夹!',
+                    type: 'warning'
+                });
+            } else {
+                for (let fid of fidList) {
+                    await this.$axios.post(this.BASE_URL + '/api/favorites/collect_question', {
+                        fid: fid,
+                        qid: qid,
+                        markAsFavorite: true
+                    }, {
+                        headers: {
+                            Authorization: 'Bearer ' + _this.$store.state.token,
+                            type: 'application/json;charset=utf-8'
+                        }
+                    })
+                        .then(async function (response) {
+                            _this.collected = response.data.collected;
+                            _this.collectNum = response.data.collectNum;
+                            _this.$message({
+                                type: 'success',
+                                message: '收藏成功!'
+                            });
+                        })
+                        .catch(function (error) {
+                            _this.$message({
+                                message: '登录后才可以收藏~!',
+                                type: 'warning'
+                            })
+                        })
+                }
+                _this.cancelCollectQDialog();
+            }
+            this.collectValid = true;
+        },
+        async collectA() {
+            if (!this.collectValid) {
+                this.$message({
+                    message: '操作过于频繁!',
+                    type: 'warning'
+                });
+            }
+            this.collectValid = false;
+            let _this = this;
+            let collectAnswerListId = _this.collectAnswerListId;
+            let answer = _this.answers[collectAnswerListId];
+            let aid = answer.id;
+            let fidList = _this.fidList;
+            if (fidList.length == 0) {
+                this.$message({
+                    message: '未选择收藏夹!',
+                    type: 'warning'
+                });
+            } else {
+                for (let fid of fidList) {
+                    await this.$axios.post(this.BASE_URL + '/api/favorites/collect_answer', {
+                        fid: fid,
+                        aid: aid,
+                        markAsFavorite: true
+                    }, {
+                        headers: {
+                            Authorization: 'Bearer ' + _this.$store.state.token,
+                            type: 'application/json;charset=utf-8'
+                        }
+                    })
+                        .then(async function (response) {
+                            _this.answers[collectAnswerListId].collected = response.data.collected;
+                            _this.answers[collectAnswerListId].collectNum = response.data.collectNum;
+                            _this.$message({
+                                type: 'success',
+                                message: '收藏成功!'
+                            });
+                        })
+                        .catch(function (error) {
+                            console.log(error)
+                            _this.$message({
+                                message: '登录后才可以收藏~!',
+                                type: 'warning'
+                            })
+                        })
+                }
+                _this.cancelCollectADialog();
+            }
+            this.collectValid = true;
+        },
         goBack() {
             this.$router.replace('/questionList');
         },
@@ -194,12 +387,20 @@ export default {
                     _this.$data.tags = response.data.question.tags;
                     _this.like = response.data.question.like;
                     _this.likeNum = response.data.question.likeNum;
+                    _this.collected = response.data.question.collected;
+                    _this.collectNum = response.data.question.collectNum;
                     let aidList = response.data.question.answers;
                     _this.answers = [];
                     for (let aid of aidList) {
-                        await _this.$axios.get(_this.BASE_URL + "/api/questions/answer?aid=" + aid)
+                        await _this.$axios.get(_this.BASE_URL + "/api/questions/answer?aid=" + aid, {
+                            headers: {
+                                Authorization: 'Bearer ' + _this.$store.state.token,
+                                type: 'application/json;charset=utf-8'
+                            }
+                        })
                             .then(async function (response) {
                                 let answer = response.data.answer;
+                                console.log(answer);
                                 answer.id = aid;
                                 let id = response.data.answer.creator;
                                 if (id === _this.$store.state.uid) {
@@ -494,8 +695,13 @@ export default {
             })
         },
     },
+    activated() {
+        this.getQuestionDetail();
+        this.getFavorites();
+    },
     mounted() {
         this.getQuestionDetail();
+        this.getFavorites();
     },
     computed: {
         prop() {
@@ -536,6 +742,13 @@ export default {
 </script>
 
 <style scoped>
+.favorite-checkbox {
+    height: 24px;
+    line-height: 24px;
+    font-size: 24px;
+    display: block;
+}
+
 .shell {
     position: absolute;
     left: 5vw;

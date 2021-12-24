@@ -8,6 +8,7 @@ import RaiseQuestion from "../pages/RaiseQuestion/RaiseQuestion";
 import SearchResult from "../pages/SearchResult/SearchResult";
 import CodeAnalysis from "../pages/CodeAnalysis/CodeAnalysis";
 import Welcome from "../pages/Welcome/Welcome";
+import Favorite from "../pages/FavoriteDetail/FavoriteDetail";
 
 Vue.use(Router)
 
@@ -74,6 +75,12 @@ export default new Router({
             path: '/personalCenter',
             component: PersonalCenter,
             name: 'personalCenter'
+        },
+        {
+            path: '/favoriteDetail',
+            component: Favorite,
+            meta: {keepAlive: true},
+            name: 'favoriteDetail'
         },
         {
             path: '/welcome',

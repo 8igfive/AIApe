@@ -8,7 +8,7 @@
                 <div v-for="msg in this.$store.state.logs" class="content">
                     <div :class="msg.id === 1? 'user':'bot'">
                         <el-avatar
-                            :src="msg.id === 1? 'http://81.70.211.128/aiape/icon-avatar' + avatarIndex + '.png': bot_avatar"
+                            :src="msg.id === 1? require('../../assets/icon-avatar' + avatarIndex + '.png'): bot_avatar"
                             size="medium" style="background-color: #fff"></el-avatar>
                         <span class="chat-content" v-html="msg.content"></span>
                     </div>

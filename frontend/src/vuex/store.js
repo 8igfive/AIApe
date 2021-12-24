@@ -10,6 +10,7 @@ export default new Vuex.Store({
             questionList: false
         },
         questionID: 0,
+        favoriteID: 0,
         username: '',
         uid: 0,
         token: '',
@@ -44,6 +45,9 @@ export default new Vuex.Store({
         },
         setQuestionID(state, id) {
             state.questionID = id;
+        },
+        setFavoriteID(state, id) {
+            state.favoriteID = id;
         },
         refreshToken(state, payload) {
             state.token = payload.token;
