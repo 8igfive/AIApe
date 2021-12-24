@@ -32,6 +32,7 @@ namespace Buaa.AIBot.Services.Models
     {
         public string Content { get; set; }
         public int? Creator { get; set; }
+        public int QuestionId { get; set; }
         public bool? Like { get; set; }
         public int LikeNum { get; set; }
         public bool? Collected { get; set; }

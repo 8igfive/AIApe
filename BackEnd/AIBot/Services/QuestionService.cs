@@ -179,6 +179,7 @@ namespace Buaa.AIBot.Services
             {
                 Content = answer.Content,
                 Creator = answer.CreaterId,
+                QuestionId = answer.QuestionId,
                 Like = like,
                 LikeNum = likeNum,
                 Collected = collected,
