@@ -67,7 +67,7 @@
                                     收藏{{ answer.collectNum }}
                                 </el-button>
                                 <el-button class="recommend" type="text"
-                                           :icon="answer.like? 'el-icon-star-on' : 'el-icon-star-off'"
+                                           :icon="answer.like? 'el-icon-success' : 'el-icon-circle-check'"
                                            @click="likeAnswer(answer)">
                                     推荐{{ answer.likeNum }}
                                 </el-button>
@@ -134,9 +134,9 @@
             </el-main>
             <el-main class="info">
                 <span>AIApe</span>
-                <span>京ICP备 2021007509号-1</span>
+                <!-- <span>京ICP备 2021007509号-1</span> -->
                 <span>
-                联系我们 @2021软件工程DQSJ
+                联系我们 @2021数据库系统原理
             </span>
             </el-main>
         </el-aside>

@@ -157,6 +157,10 @@ Vue.prototype.$changePage = function (index) {
             this.$router.replace('/favoriteDetail');
             break;
         }
+        case 8: {
+            this.$router.replace('/dataStatistics');
+            break;
+        }
     }
 }
 

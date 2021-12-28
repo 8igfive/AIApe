@@ -31,7 +31,7 @@
                         </div>
                         <div class="recommend-time">
                             <el-button class="recommend" type="text"
-                                       :icon="question.like? 'el-icon-star-on' : 'el-icon-star-off'"
+                                       :icon="question.like? 'el-icon-success' : 'el-icon-circle-check'"
                                        @click="like(question)">
                                 推荐{{ question.likeNum }}
                             </el-button>
