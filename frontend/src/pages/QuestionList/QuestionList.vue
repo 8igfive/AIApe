@@ -77,7 +77,7 @@
                                     收藏{{ question.collectNum }}
                                 </el-button>
                                 <el-button class="recommend" type="text"
-                                           :icon="question.like? 'el-icon-star-on' : 'el-icon-star-off'"
+                                           :icon="question.like? 'el-icon-success' : 'el-icon-circle-check'"
                                            @click="like(question)">
                                     推荐{{ question.likeNum }}
                                 </el-button>
@@ -149,7 +149,7 @@ export default {
         this.isAdmin = (this.$store.state.auth === 2);
     },
     methods: {
-                async collect() {
+        async collect() {
             if (!this.collectValid) {
                 this.$message({
                     message: '操作过于频繁!',

@@ -9,6 +9,7 @@ import SearchResult from "../pages/SearchResult/SearchResult";
 import CodeAnalysis from "../pages/CodeAnalysis/CodeAnalysis";
 import Welcome from "../pages/Welcome/Welcome";
 import Favorite from "../pages/FavoriteDetail/FavoriteDetail";
+import DataStatistics from "../pages/DataStatistics/DataStatistics";
 
 Vue.use(Router)
 
@@ -81,6 +82,12 @@ export default new Router({
             component: Favorite,
             meta: {keepAlive: true},
             name: 'favoriteDetail'
+        },
+        {
+            path: '/dataStatistics',
+            component: DataStatistics,
+            meta: {keepAlive: true},
+            name: 'dataStatistics'
         },
         {
             path: '/welcome',

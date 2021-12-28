@@ -186,7 +186,7 @@ export default {
                             message: '提问成功',
                             type: 'success'
                         })
-                        _this.$changePage(2);
+                        _this.$changePage(1);
                     })
             )
                 .catch(() => {

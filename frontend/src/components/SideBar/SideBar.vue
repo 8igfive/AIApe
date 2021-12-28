@@ -1,5 +1,5 @@
 <template>
-    <el-aside width="5vw" v-show="this.$store.state.routerIndex < 8">
+    <el-aside width="5vw" v-show="this.$store.state.routerIndex < 9">
         <div style="display: flex; flex-direction: column; align-items: center">
             <el-popover placement="right-end" trigger="hover" :title="this.$store.state.username" content="欢迎使用AIApe"
                         v-if="this.$store.state.username !== ''">
@@ -20,12 +20,14 @@
                v-show="questionDetailExist"></i>
             <i class="el-icon-search" :class="(index === 4)? 'selected' : 'unselected'" @click="changePage(4);"
                v-show="searchResultExist"></i>
-            <i class="el-icon-cpu" :class="(index === 5)? 'selected' : 'unselected'" @click="changePage(5);"
-               v-show="this.$store.state.username !== ''"></i>
+            <!-- <i class="el-icon-cpu" :class="(index === 5)? 'selected' : 'unselected'" @click="changePage(5);"
+               v-show="this.$store.state.username !== ''"></i> -->
             <i class="el-icon-star-off" :class="(index === 7)? 'selected' : 'unselected'" @click="changePage(7);"
                v-show="this.$store.state.username !== ''"></i>
+            <i class="el-icon-data-analysis" :class="(index === 8)? 'selected' : 'unselected'" @click="changePage(8);"
+               v-show="this.$store.state.username === 'root'"></i>
         </div>
-        <i class="el-icon-question" @click="openWelcome"></i>
+        <!-- <i class="el-icon-question" @click="openWelcome"></i> -->
     </el-aside>
 </template>
 
@@ -35,6 +37,9 @@ export default {
         return {}
     },
     computed: {
+        authority() {
+            return this.$store.state.auth;
+        },
         index() {
             return this.$store.state.routerIndex;
         },

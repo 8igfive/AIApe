@@ -44,7 +44,7 @@
                             收藏{{ collectNum }}
                         </el-button>
                         <el-button class="recommend"
-                                   :icon="like? 'el-icon-star-on' : 'el-icon-star-off'"
+                                   :icon="like? 'el-icon-success' : 'el-icon-circle-check'"
                                    @click="like_question()" size="mini" type="text">
                             推荐{{ likeNum }}
                         </el-button>
@@ -91,7 +91,7 @@
                             收藏{{ answer.collectNum }}
                         </el-button>
                         <el-button class="recommend" type="text"
-                                   :icon="answer.like? 'el-icon-star-on' : 'el-icon-star-off'"
+                                   :icon="answer.like? 'el-icon-success' : 'el-icon-circle-check'"
                                    @click="like_answer(answer)">
                             推荐{{ answer.likeNum }}
                         </el-button>
