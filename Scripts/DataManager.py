@@ -3,6 +3,7 @@ from DataManager.SelectTags import select_tags
 from DataManager.BuildAutoTag import generate_all_auto_tags
 from DataManager.TagManager import push_all_tags_to_remote
 from DataManager.NatrualPusher import push_all_natrual_to_remote
+from DataManager.ComputeStatistics import compute_statistics
 import utils.Poster
 from DataManager.Raw2Pure import raw_to_pure
 from utils.Utils import log, pcat
@@ -54,6 +55,7 @@ def main():
         "select": select_tags,
         "questions" : push_all_question_to_remote,
         "natrual": push_all_natrual_to_remote,
+        "statistics": compute_statistics,
         "help" : help
     }
     prompt = ", ".join(apps)
